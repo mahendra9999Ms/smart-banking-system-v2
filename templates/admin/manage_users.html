@@ -1,0 +1,150 @@
+{% extends "base.html" %}{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div class="page-title mb-0"><span class="pill">👥</span> Manage Users</div>
+  <a href="{% url 'create_user' %}" class="btn-gold"><i class="bi bi-person-plus"></i> Create User</a>
+</div>
+
+<!-- Search bar -->
+<div class="asb-card fu mb-3">
+  <form method="GET" class="d-flex gap-2 align-items-center">
+    <input type="text" name="q" value="{{ q }}" class="asb-input"
+           placeholder="Search by username, name or email..."
+           style="max-width:360px;">
+    <button type="submit" class="btn-gold"><i class="bi bi-search"></i> Search</button>
+    {% if q %}<a href="{% url 'manage_users' %}" class="btn-outline">Clear</a>{% endif %}
+  </form>
+</div>
+
+<div class="asb-card fu">
+  <table class="asb-table">
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Account No.</th>
+        <th>Balance</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for u in users %}
+    <tr>
+      <td>
+        <strong>{{ u.username }}</strong>
+        {% if u.is_staff %}<span class="bdg bdg-pending ms-1">Admin</span>{% endif %}
+        <br><span style="font-size:.76rem;color:var(--muted);">{{ u.userprofile.full_name }}</span>
+      </td>
+      <td style="font-family:monospace;font-size:.84rem;color:var(--gold);">{{ u.userprofile.account_number }}</td>
+      <td style="font-weight:700;">₹{{ u.userprofile.balance }}</td>
+      <td>
+        <span class="bdg {% if u.userprofile.account_status == 'ACTIVE' %}bdg-ok{% elif u.userprofile.account_status == 'PENDING' %}bdg-pending{% elif u.userprofile.account_status == 'BLOCKED' %}bdg-danger{% else %}bdg-warn{% endif %}">
+          {{ u.userprofile.account_status }}
+        </span>
+      </td>
+      <td>
+        <div class="d-flex gap-1 flex-wrap align-items-center">
+
+          <!-- Block / Unblock -->
+          <form method="POST" style="display:inline;">{% csrf_token %}
+            <input type="hidden" name="user_id" value="{{ u.id }}">
+            {% if u.userprofile.account_status == 'ACTIVE' or u.is_active %}
+              <button type="submit" name="action" value="block"
+                      class="btn-danger" style="padding:4px 10px;font-size:.76rem;">
+                <i class="bi bi-slash-circle"></i> Block
+              </button>
+            {% else %}
+              <button type="submit" name="action" value="unblock"
+                      class="btn-outline" style="padding:4px 10px;font-size:.76rem;color:var(--teal);border-color:rgba(25,184,160,.3);">
+                <i class="bi bi-check-circle"></i> Unblock
+              </button>
+            {% endif %}
+          </form>
+
+          <!-- Balance Credit / Debit -->
+          <form method="POST" action="{% url 'adjust_balance' u.id %}"
+                style="display:inline;display:flex;gap:4px;align-items:center;">{% csrf_token %}
+            <input type="number" name="amount" placeholder="₹"
+                   class="asb-input" style="width:75px;padding:4px 8px;font-size:.78rem;" step="100">
+            <button type="submit" name="action" value="credit"
+                    class="btn-outline" style="padding:4px 9px;font-size:.76rem;color:var(--teal);border-color:rgba(25,184,160,.3);">+</button>
+            <button type="submit" name="action" value="debit"
+                    class="btn-outline" style="padding:4px 9px;font-size:.76rem;color:var(--red);border-color:rgba(224,82,82,.3);">-</button>
+          </form>
+
+          <!-- Edit -->
+          <a href="{% url 'edit_user' u.id %}" class="btn-outline" style="padding:4px 10px;font-size:.76rem;">
+            <i class="bi bi-pencil"></i>
+          </a>
+
+          <!-- Delete (non-admin users only) -->
+          {% if not u.is_staff and not u.is_superuser %}
+          <button type="button"
+                  class="btn-danger"
+                  style="padding:4px 10px;font-size:.76rem;background:rgba(224,82,82,.2);border-color:rgba(224,82,82,.5);"
+                  onclick="confirmDelete('{{ u.id }}', '{{ u.username }}')">
+            <i class="bi bi-trash3"></i> Delete
+          </button>
+          {% endif %}
+
+        </div>
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:28px;">No users found.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <div class="pag">{% with users as p %}{% if p.has_previous %}<a href="?page={{ p.previous_page_number }}">‹</a>{% endif %}<span class="current">{{ p.number }}/{{ p.paginator.num_pages }}</span>{% if p.has_next %}<a href="?page={{ p.next_page_number }}">›</a>{% endif %}{% endwith %}</div>
+</div>
+
+<!-- ── Delete Confirmation Modal ─────────────────────────────── -->
+<div id="deleteModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:var(--navy2);border:1px solid rgba(224,82,82,.4);border-radius:16px;padding:32px;max-width:440px;width:90%;box-shadow:0 16px 48px rgba(0,0,0,.5);">
+    <div style="font-size:2.2rem;text-align:center;margin-bottom:12px;">🗑️</div>
+    <h5 style="font-family:'Playfair Display',serif;font-weight:700;text-align:center;margin-bottom:8px;">Delete User Account</h5>
+    <p style="text-align:center;color:var(--muted);font-size:.88rem;margin-bottom:6px;">
+      You are about to permanently delete:
+    </p>
+    <p style="text-align:center;font-weight:700;font-size:1.05rem;color:var(--red);margin-bottom:16px;" id="deleteUsername"></p>
+    <div class="abox danger" style="font-size:.82rem;margin-bottom:20px;">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      <div>This will permanently delete the account along with all their transactions, fraud records, and history. <strong>This action cannot be undone.</strong></div>
+    </div>
+    <form method="POST" id="deleteForm">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="delete">
+      <input type="hidden" name="user_id" id="deleteUserId">
+      <div class="d-flex gap-3">
+        <button type="button" onclick="closeModal()"
+                class="btn-outline flex-grow-1" style="justify-content:center;">
+          Cancel
+        </button>
+        <button type="submit"
+                style="flex:1;background:var(--red);color:#fff;font-weight:700;border:none;padding:10px 20px;border-radius:9px;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;gap:6px;">
+          <i class="bi bi-trash3-fill"></i> Yes, Delete
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function confirmDelete(userId, username) {
+  document.getElementById('deleteUserId').value  = userId;
+  document.getElementById('deleteUsername').textContent = username;
+  var modal = document.getElementById('deleteModal');
+  modal.style.display = 'flex';
+}
+function closeModal() {
+  document.getElementById('deleteModal').style.display = 'none';
+}
+// Close on backdrop click
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+// Close on Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModal();
+});
+</script>
+{% endblock %}

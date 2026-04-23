@@ -1,0 +1,288 @@
+{% extends "base.html" %}{% block content %}
+
+<!-- ── Balance Hero Card ─────────────────────────────────────────── -->
+<div class="asb-card fu mb-4" style="background:linear-gradient(135deg,#172540,#0F1E38);position:relative;overflow:hidden;">
+  <div style="position:absolute;top:-50px;right:-50px;width:200px;height:200px;background:radial-gradient(circle,rgba(201,168,76,.10),transparent 70%);border-radius:50%;"></div>
+  <div style="position:absolute;bottom:-30px;left:30%;width:120px;height:120px;background:radial-gradient(circle,rgba(25,184,160,.06),transparent 70%);border-radius:50%;"></div>
+
+  <div class="row align-items-center">
+    <div class="col-md-7">
+      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:4px;">Available Balance</div>
+      <div style="font-size:2.8rem;font-weight:700;color:var(--gold);font-family:'Playfair Display',serif;line-height:1.1;">
+        ₹ {{ balance }}
+      </div>
+      <div class="mt-3 d-flex align-items-center gap-3 flex-wrap">
+        <span style="font-family:monospace;background:rgba(201,168,76,.1);border:1px solid var(--border);padding:4px 14px;border-radius:7px;color:var(--gold);font-size:.9rem;letter-spacing:1px;">
+          {{ account_number }}
+        </span>
+        <span style="font-size:.85rem;color:var(--muted);">
+          <i class="bi bi-person-circle"></i> {{ profile.full_name|default:request.user.username }}
+        </span>
+      </div>
+    </div>
+    <div class="col-md-5 mt-3 mt-md-0">
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:.8rem;color:var(--muted);">Account Status</span>
+          <span class="bdg bdg-ok">{{ profile.account_status }}</span>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:.8rem;color:var(--muted);">Transaction PIN</span>
+          {% if profile.pin_hash %}
+            <span class="bdg bdg-ok"><i class="bi bi-check-circle"></i> Set</span>
+          {% else %}
+            <a href="{% url 'set_pin' %}" class="bdg bdg-warn" style="text-decoration:none;"><i class="bi bi-exclamation-circle"></i> Not Set</a>
+          {% endif %}
+        </div>
+        <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:.8rem;color:var(--muted);">Fraud Protection</span>
+          <span class="bdg bdg-ok"><i class="bi bi-shield-check"></i> Active</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── HIGH-RISK Pending Alerts ───────────────────────────────────── -->
+{% if pending_high %}
+<div class="abox warning fu mb-4" style="flex-direction:column;gap:12px;">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <i class="bi bi-hourglass-split" style="font-size:1.2rem;flex-shrink:0;"></i>
+    <div>
+      <strong>{{ pending_high.count }} HIGH-RISK Transaction{{ pending_high.count|pluralize }} Pending</strong>
+      <div style="font-size:.8rem;margin-top:2px;">These are in the 10-minute safety delay. You can still cancel them.</div>
+    </div>
+  </div>
+  {% for t in pending_high %}
+  <div style="background:rgba(0,0,0,.25);border:1px solid rgba(230,126,34,.2);border-radius:9px;padding:10px 14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+    <span style="font-weight:700;font-family:'Playfair Display',serif;">₹{{ t.amount }}</span>
+    <span style="font-size:.84rem;color:var(--muted);">{{ t.bill_type }}</span>
+    <span class="bdg bdg-warn"><i class="bi bi-clock"></i> {{ t.delay_seconds_remaining }}s left</span>
+    <a href="{% url 'cancel_transaction' t.cancel_token %}" class="btn-danger ms-auto" style="padding:5px 14px;font-size:.78rem;">
+      <i class="bi bi-x-circle"></i> Cancel
+    </a>
+  </div>
+  {% endfor %}
+  <a href="{% url 'execute_pending' %}" class="btn-gold" style="font-size:.82rem;padding:7px 16px;align-self:flex-start;">
+    <i class="bi bi-check2-circle"></i> Check & Execute Expired
+  </a>
+</div>
+{% endif %}
+
+<!-- ── Quick Actions ──────────────────────────────────────────────── -->
+<div class="page-title fu fu1">
+  <span class="pill"><i class="bi bi-lightning-charge-fill" style="color:var(--gold);"></i></span>
+  Quick Actions
+</div>
+<div class="row g-3 mb-4">
+
+  <div class="col-6 col-md-3 fu fu1">
+    <a href="{% url 'send_money' %}" style="text-decoration:none;">
+      <div class="asb-card text-center h-100" style="background:#0A1E1A;cursor:pointer;transition:.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+        <div class="si si-teal mx-auto"><i class="bi bi-send-fill"></i></div>
+        <div style="font-weight:600;font-size:.95rem;font-family:'DM Sans',sans-serif;">Send Money</div>
+        <div style="font-size:.76rem;color:var(--muted);margin-top:4px;">Internal & external transfer</div>
+      </div>
+    </a>
+  </div>
+
+  <div class="col-6 col-md-3 fu fu2">
+    <a href="{% url 'bill_pay' %}" style="text-decoration:none;">
+      <div class="asb-card text-center h-100" style="background:#1E1805;cursor:pointer;transition:.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+        <div class="si si-gold mx-auto"><i class="bi bi-receipt-cutoff"></i></div>
+        <div style="font-weight:600;font-size:.95rem;font-family:'DM Sans',sans-serif;">Pay Bills</div>
+        <div style="font-size:.76rem;color:var(--muted);margin-top:4px;">Electricity, Water, Mobile</div>
+      </div>
+    </a>
+  </div>
+
+  <div class="col-6 col-md-3 fu fu3">
+    <a href="{% url 'receive_money' %}" style="text-decoration:none;">
+      <div class="asb-card text-center h-100" style="background:#0A1825;cursor:pointer;transition:.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+        <div class="si si-blue mx-auto"><i class="bi bi-arrow-down-left-circle-fill"></i></div>
+        <div style="font-weight:600;font-size:.95rem;font-family:'DM Sans',sans-serif;">Receive Money</div>
+        <div style="font-size:.76rem;color:var(--muted);margin-top:4px;">Share your account number</div>
+      </div>
+    </a>
+  </div>
+
+  <div class="col-6 col-md-3 fu fu4">
+    <a href="{% url 'transactions' %}" style="text-decoration:none;">
+      <div class="asb-card text-center h-100" style="cursor:pointer;transition:.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+        <div class="si mx-auto" style="background:rgba(167,139,250,.12);color:#A78BFA;"><i class="bi bi-clock-history"></i></div>
+        <div style="font-weight:600;font-size:.95rem;font-family:'DM Sans',sans-serif;">History</div>
+        <div style="font-size:.76rem;color:var(--muted);margin-top:4px;">View all transactions</div>
+      </div>
+    </a>
+  </div>
+
+</div>
+
+<!-- ── Account Summary + Security Info Row ───────────────────────── -->
+<div class="row g-3 mb-4">
+
+  <div class="col-md-4 fu fu2">
+    <div class="asb-card h-100" style="background:#172540;">
+      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:12px;">Your Profile</div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:.86rem;">
+        <div style="display:flex;justify-content:space-between;">
+          <span style="color:var(--muted);">Name</span>
+          <span style="font-weight:600;">{{ profile.full_name|default:"—" }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span style="color:var(--muted);">Email</span>
+          <span style="font-size:.82rem;">{{ profile.email|default:"—" }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span style="color:var(--muted);">Phone</span>
+          <span>{{ profile.phone|default:"—" }}</span>
+        </div>
+        
+      </div>
+      <div class="mt-3">
+        <a href="{% url 'profile' %}" class="btn-outline w-100" style="justify-content:center;font-size:.82rem;">
+          <i class="bi bi-pencil"></i> Edit Profile
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4 fu fu3">
+    <div class="asb-card h-100" style="background:#0D1B2E;">
+      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:12px;">Security</div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:.86rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:var(--muted);">Password</span>
+          <span class="bdg bdg-ok"><i class="bi bi-lock-fill"></i> Protected</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:var(--muted);">Transaction PIN</span>
+          {% if profile.pin_hash %}
+            <span class="bdg bdg-ok"><i class="bi bi-check-circle"></i> Set</span>
+          {% else %}
+            <span class="bdg bdg-high"><i class="bi bi-x-circle"></i> Not Set</span>
+          {% endif %}
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:var(--muted);">OTP Verification</span>
+          <span class="bdg bdg-ok"><i class="bi bi-shield-check"></i> Active</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:var(--muted);">Fraud Detection</span>
+          <span class="bdg bdg-ok"><i class="bi bi-cpu"></i> AI Active</span>
+        </div>
+      </div>
+      {% if not profile.pin_hash %}
+      <div class="mt-3">
+        <a href="{% url 'set_pin' %}" class="btn-gold w-100" style="justify-content:center;font-size:.82rem;">
+          <i class="bi bi-key"></i> Set Transaction PIN
+        </a>
+      </div>
+      {% else %}
+      <div class="mt-3">
+        <a href="{% url 'set_pin' %}" class="btn-outline w-100" style="justify-content:center;font-size:.82rem;">
+          <i class="bi bi-key"></i> Change PIN
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="col-md-4 fu fu4">
+    <div class="asb-card h-100" style="background:#0D1B2E;">
+      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:12px;">Risk Info</div>
+      <div style="font-size:.84rem;display:flex;flex-direction:column;gap:10px;">
+        <div style="background:rgba(25,184,160,.06);border:1px solid rgba(25,184,160,.2);border-radius:8px;padding:9px 12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span class="bdg bdg-low">LOW</span>
+            <span style="font-size:.8rem;color:var(--muted);">Score 0–40</span>
+          </div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:4px;">OTP → Instant execution</div>
+        </div>
+        <div style="background:rgba(230,126,34,.06);border:1px solid rgba(230,126,34,.2);border-radius:8px;padding:9px 12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span class="bdg bdg-med">MEDIUM</span>
+            <span style="font-size:.8rem;color:var(--muted);">Score 40–70</span>
+          </div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:4px;">OTP → Execute with warning</div>
+        </div>
+        <div style="background:rgba(224,82,82,.06);border:1px solid rgba(224,82,82,.2);border-radius:8px;padding:9px 12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span class="bdg bdg-high">HIGH</span>
+            <span style="font-size:.8rem;color:var(--muted);">Score 70–95</span>
+          </div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:4px;">OTP → PIN → 10-min delay</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Recent Activity ────────────────────────────────────────────── -->
+{% if recent %}
+<div class="page-title fu fu3">
+  <span class="pill"><i class="bi bi-clock" style="color:var(--gold);"></i></span>
+  Recent Activity
+</div>
+<div class="asb-card fu fu4">
+  <table class="asb-table">
+    <thead>
+      <tr>
+        <th>Date & Time</th>
+        <th>Transaction Type</th>
+        <th>Amount</th>
+        <th>Risk Level</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for t in recent %}
+    <tr>
+      <td style="color:var(--muted);font-size:.8rem;white-space:nowrap;">{{ t.created_at|date:"d M Y, H:i" }}</td>
+      <td style="font-size:.875rem;">{{ t.bill_type }}</td>
+      <td style="font-weight:700;color:{% if t.status == 'SUSPICIOUS' or t.status == 'BLOCKED' %}var(--red){% else %}var(--gold){% endif %};">
+        ₹{{ t.amount }}
+      </td>
+      <td>
+        {% if t.risk_level == 'LOW' %}<span class="bdg bdg-low">LOW</span>
+        {% elif t.risk_level == 'MEDIUM' %}<span class="bdg bdg-med">MEDIUM</span>
+        {% else %}<span class="bdg bdg-high">HIGH</span>{% endif %}
+      </td>
+      <td>
+        {% if t.status == 'SUCCESS' %}<span class="bdg bdg-ok">SUCCESS</span>
+        {% elif t.status == 'HIGH_RISK_VERIFIED' %}<span class="bdg bdg-med">VERIFIED</span>
+        {% elif t.status == 'SUSPICIOUS' %}<span class="bdg bdg-warn">SUSPICIOUS</span>
+        {% elif t.status == 'BLOCKED' %}<span class="bdg bdg-danger">BLOCKED</span>
+        {% elif t.status == 'PENDING_HIGH' %}<span class="bdg bdg-pending">PENDING</span>
+        {% else %}<span class="bdg bdg-pending">{{ t.status }}</span>{% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <div class="mt-3 d-flex justify-content-between align-items:center">
+    <span style="font-size:.8rem;color:var(--muted);">Showing last {{ recent|length }} transactions</span>
+    <a href="{% url 'transactions' %}" class="btn-outline" style="font-size:.82rem;">
+      View All History →
+    </a>
+  </div>
+</div>
+{% else %}
+<!-- No transactions yet -->
+<div class="page-title fu fu3">
+  <span class="pill"><i class="bi bi-clock" style="color:var(--gold);"></i></span>
+  Recent Activity
+</div>
+<div class="asb-card fu fu4 text-center" style="padding:40px 20px;">
+  <div style="font-size:3rem;margin-bottom:12px;opacity:.4;">📋</div>
+  <div style="font-size:1rem;font-weight:600;color:var(--muted);margin-bottom:6px;">No transactions yet</div>
+  <div style="font-size:.84rem;color:var(--muted);margin-bottom:20px;">Make your first transfer or bill payment to see activity here.</div>
+  <div class="d-flex gap-3 justify-content-center">
+    <a href="{% url 'send_money' %}" class="btn-gold"><i class="bi bi-send"></i> Send Money</a>
+    <a href="{% url 'bill_pay' %}" class="btn-outline"><i class="bi bi-receipt"></i> Pay Bill</a>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

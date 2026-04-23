@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% block content %}
+<div class="row justify-content-center"><div class="col-md-6">
+  <div class="asb-card fu text-center">
+    {% if ok %}
+    <div style="font-size:3rem;margin-bottom:12px;">✅</div>
+    <h4 style="color:var(--teal);font-weight:700;">Transaction Cancelled</h4>
+    <p style="color:var(--muted);font-size:.88rem;margin-top:8px;">{{ msg }}</p>
+    <div class="abox warning mt-4 text-start"><i class="bi bi-exclamation-triangle"></i>
+      <div>This transaction has been flagged as <strong>SUSPICIOUS</strong> for admin review. No funds were moved.</div></div>
+    {% else %}
+    <div style="font-size:3rem;margin-bottom:12px;">❌</div>
+    <h4 style="color:var(--red);font-weight:700;">Cannot Cancel</h4>
+    <p style="color:var(--muted);font-size:.88rem;margin-top:8px;">{{ msg }}</p>
+    {% endif %}
+    <a href="{% url 'user_dashboard' %}" class="btn-gold mt-4">← Back to Dashboard</a>
+  </div>
+</div></div>
+{% endblock %}

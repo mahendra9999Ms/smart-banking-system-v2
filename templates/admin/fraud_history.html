@@ -1,0 +1,36 @@
+{% extends "base.html" %}{% block content %}
+<div class="page-title"><span class="pill">📁</span> Fraud History</div>
+<div class="asb-card fu mb-3">
+  <form method="GET" class="d-flex gap-2">
+    <select name="risk" class="asb-input" style="max-width:160px;">
+      <option value="">All Risk Levels</option>
+      <option value="LOW" {% if risk == 'LOW' %}selected{% endif %}>LOW</option>
+      <option value="MEDIUM" {% if risk == 'MEDIUM' %}selected{% endif %}>MEDIUM</option>
+      <option value="HIGH" {% if risk == 'HIGH' %}selected{% endif %}>HIGH</option>
+    </select>
+    <button type="submit" class="btn-gold">Filter</button>
+    <a href="{% url 'fraud_history' %}" class="btn-outline">Clear</a>
+  </form>
+</div>
+<div class="asb-card fu fu1">
+  <table class="asb-table">
+    <thead><tr><th>Detected</th><th>User</th><th>Type</th><th>Amount</th><th>Risk</th><th>Score</th><th>Explanation</th></tr></thead>
+    <tbody>
+    {% for r in records %}
+    <tr>
+      <td style="font-size:.8rem;color:var(--muted);">{{ r.detected_at|date:"d M Y, H:i" }}</td>
+      <td style="font-weight:700;">{{ r.user.username }}</td>
+      <td style="font-size:.84rem;">{{ r.bill_type }}</td>
+      <td style="font-weight:700;color:{% if r.risk_level == 'HIGH' %}var(--red){% elif r.risk_level == 'MEDIUM' %}var(--orange){% else %}var(--gold){% endif %};">₹{{ r.amount }}</td>
+      <td>{% if r.risk_level == 'HIGH' %}<span class="bdg bdg-high">HIGH</span>{% elif r.risk_level == 'MEDIUM' %}<span class="bdg bdg-med">MEDIUM</span>{% else %}<span class="bdg bdg-low">LOW</span>{% endif %}</td>
+      <td style="font-weight:700;color:{% if r.risk_score >= 70 %}var(--red){% elif r.risk_score >= 40 %}var(--orange){% else %}var(--teal){% endif %};">{{ r.risk_score }}</td>
+      <td style="font-size:.8rem;color:var(--muted);">{{ r.explanation|truncatechars:80 }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px;">No records found.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <div class="pag">{% with records as p %}{% if p.has_previous %}<a href="?page={{ p.previous_page_number }}&risk={{ risk }}">‹</a>{% endif %}<span class="current">{{ p.number }}/{{ p.paginator.num_pages }}</span>{% if p.has_next %}<a href="?page={{ p.next_page_number }}&risk={{ risk }}">›</a>{% endif %}{% endwith %}</div>
+</div>
+{% endblock %}

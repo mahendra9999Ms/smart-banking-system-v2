@@ -1,0 +1,32 @@
+{% extends "base.html" %}{% block content %}
+<div class="page-title"><span class="pill">👤</span> Pending User Approvals</div>
+{% if not pending_profiles %}
+<div class="abox success fu"><i class="bi bi-check-circle"></i> No pending registrations.</div>
+{% else %}
+{% for p in pending_profiles %}
+<div class="asb-card fu mb-3">
+  <div class="row align-items-center">
+    <div class="col-md-8">
+      <div style="font-weight:700;font-size:1rem;">{{ p.user.username }}</div>
+      <div style="font-size:.82rem;color:var(--muted);margin-top:4px;">
+        {{ p.full_name }} · {{ p.email }} · {{ p.phone }}<br>
+        Registered: {{ p.user.date_joined|date:"d M Y, H:i" }}
+      </div>
+    </div>
+    <div class="col-md-4">
+      <form method="POST" action="{% url 'approve_user' p.user.id %}">{% csrf_token %}
+        <div class="mb-2"><input type="number" name="initial_balance" value="5000" class="asb-input" placeholder="Initial balance ₹" step="100"></div>
+        <div class="d-flex gap-2">
+          <button type="submit" name="action" value="approve" class="btn-gold flex-grow-1" style="font-size:.82rem;">✓ Approve</button>
+        </div>
+      </form>
+      <form method="POST" action="{% url 'approve_user' p.user.id %}" class="mt-2">{% csrf_token %}
+        <input type="text" name="reason" class="asb-input mb-2" placeholder="Rejection reason (optional)" style="font-size:.8rem;">
+        <button type="submit" name="action" value="reject" class="btn-danger w-100" style="font-size:.82rem;">✕ Reject</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endfor %}
+{% endif %}
+{% endblock %}

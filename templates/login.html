@@ -1,0 +1,47 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Login — ASB Smart Banking</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',sans-serif;background:#0B1629;color:#E8EDF5;min-height:100vh;display:flex;}
+.left{flex:1;background:#0D1B2E;display:flex;flex-direction:column;justify-content:center;padding:60px;overflow:hidden;position:relative;}
+.left::before{content:'';position:absolute;top:-80px;left:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(201,168,76,.07),transparent 70%);border-radius:50%;}
+.brand{font-size:2rem;font-weight:700;color:#C9A84C;margin-bottom:4px;}.brand span{color:#E8EDF5;}
+.tagline{font-size:.88rem;color:#7A8BAA;margin-bottom:44px;}
+.feat{display:flex;align-items:flex-start;gap:13px;margin-bottom:22px;}
+.feat-icon{width:36px;height:36px;border-radius:9px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);display:flex;align-items:center;justify-content:center;color:#C9A84C;flex-shrink:0;font-size:1rem;}
+.feat-title{color:#E8EDF5;font-weight:600;font-size:.84rem;margin-bottom:2px;}
+.feat-sub{color:#7A8BAA;font-size:.78rem;}
+.right{width:460px;background:rgba(17,30,53,.98);border-left:1px solid rgba(201,168,76,.15);display:flex;flex-direction:column;justify-content:center;padding:52px 46px;}
+.login-title{font-size:1.65rem;font-weight:700;margin-bottom:4px;}
+.login-sub{font-size:.85rem;color:#7A8BAA;margin-bottom:30px;}
+.fg{margin-bottom:16px;}
+.fg label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#7A8BAA;display:block;margin-bottom:6px;}
+.inp-wrap{position:relative;}.inp-wrap i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#7A8BAA;}
+.fg input{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:9px;color:#E8EDF5;padding:11px 14px 11px 36px;font-size:.88rem;outline:none;transition:.2s;font-family:inherit;}
+.fg input:focus{border-color:#C9A84C;box-shadow:0 0 0 3px rgba(201,168,76,.12);}
+.btn-login{width:100%;background:linear-gradient(135deg,#C9A84C,#E8C46A);color:#0B1629;font-weight:700;border:none;padding:12px;border-radius:9px;font-size:.92rem;cursor:pointer;margin-top:4px;}
+.err{background:rgba(224,82,82,.1);border:1px solid rgba(224,82,82,.3);color:#E05252;border-radius:9px;padding:10px 14px;font-size:.84rem;margin-bottom:14px;display:flex;gap:8px;align-items:center;}
+.reg-link{text-align:center;margin-top:20px;font-size:.84rem;color:#7A8BAA;}.reg-link a{color:#C9A84C;text-decoration:none;font-weight:600;}
+@media(max-width:780px){.left{display:none;}.right{width:100%;padding:40px 22px;}}
+</style></head><body>
+<div class="left">
+  <div class="brand">ASB <span>Smart Banking</span></div>
+  <div class="tagline">Industry-Grade AI Fraud Detection · Risk-Based Security</div>
+  <div class="feat"><div class="feat-icon"><i class="bi bi-shield-check"></i></div><div><div class="feat-title">Real-Time Fraud Detection</div><div class="feat-sub">ML + behavioral analysis on every transaction</div></div></div>
+  <div class="feat"><div class="feat-icon"><i class="bi bi-hourglass-split"></i></div><div><div class="feat-title">Delay & Cancel for HIGH Risk</div><div class="feat-sub">10-minute window to cancel suspicious HIGH transfers</div></div></div>
+  <div class="feat"><div class="feat-icon"><i class="bi bi-person-check"></i></div><div><div class="feat-title">Admin Approval Required</div><div class="feat-sub">All registrations reviewed before activation</div></div></div>
+  <div class="feat"><div class="feat-icon"><i class="bi bi-key"></i></div><div><div class="feat-title">Step-Up Authentication</div><div class="feat-sub">PIN verification required for HIGH-risk transactions</div></div></div>
+</div>
+<div class="right">
+  <div class="login-title">Welcome back</div>
+  <div class="login-sub">Sign in to your secure banking account</div>
+  {% if error %}<div class="err"><i class="bi bi-exclamation-circle"></i>{{ error }}</div>{% endif %}
+  <form method="POST">{% csrf_token %}
+    <div class="fg"><label>Username</label><div class="inp-wrap"><i class="bi bi-person"></i><input type="text" name="username" placeholder="Enter username" required autofocus></div></div>
+    <div class="fg"><label>Password</label><div class="inp-wrap"><i class="bi bi-lock"></i><input type="password" name="password" placeholder="Enter password" required></div></div>
+    <button class="btn-login" type="submit">SIGN IN  →</button>
+  </form>
+  <div class="reg-link">No account? <a href="{% url 'register' %}">Register here</a></div>
+</div>
+</body></html>

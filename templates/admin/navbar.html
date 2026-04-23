@@ -1,0 +1,14 @@
+<nav class="asb-nav">
+  <a href="{% url 'admin_dashboard' %}" class="brand">ASB <span>Admin</span></a>
+  <div class="nav-links d-flex gap-1" style="font-size:.8rem;">
+    <a href="{% url 'admin_dashboard' %}"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <a href="{% url 'pending_users' %}"><i class="bi bi-person-check"></i> Approvals</a>
+    <a href="{% url 'manage_users' %}"><i class="bi bi-people"></i> Users</a>
+    <a href="{% url 'all_transactions' %}"><i class="bi bi-arrow-left-right"></i> Txns</a>
+    <a href="{% url 'fraud_alerts' %}"><i class="bi bi-shield-exclamation"></i> Alerts</a>
+    <a href="{% url 'fraud_history' %}"><i class="bi bi-file-earmark-lock"></i> Fraud</a>
+    <a href="{% url 'reports' %}"><i class="bi bi-bar-chart-line"></i> Reports</a>
+    <a href="{% url 'audit_log' %}"><i class="bi bi-journal-text"></i> Audit</a>
+  </div>
+  <a href="{% url 'logout' %}" class="btn-outline" style="padding:5px 13px;font-size:.8rem;"><i class="bi bi-box-arrow-right"></i> Logout</a>
+</nav>

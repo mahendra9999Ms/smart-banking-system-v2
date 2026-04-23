@@ -1,0 +1,10 @@
+/* ASB Smart Banking — style.css
+   All primary styles are defined in base.html <style> block.
+   This file is kept for any additional overrides. */
+
+/* Bootstrap table override for dark theme */
+.table { color: var(--text, #E8EDF5); }
+.table-bordered { border-color: rgba(201,168,76,0.15); }
+
+/* Ensure Bootstrap form controls don't override asb-input */
+.form-control:focus { box-shadow: none; }

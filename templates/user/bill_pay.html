@@ -1,0 +1,165 @@
+{% extends "base.html" %}{% block content %}
+<div class="page-title"><span class="pill">🧾</span> Pay Bills</div>
+
+<div class="row g-4">
+<div class="col-md-7">
+  <div class="asb-card fu">
+
+    <!-- Result message -->
+    {% if msg %}
+    <div class="abox {% if fraud %}danger{% elif warn %}warning{% else %}success{% endif %} mb-4">
+      <i class="bi bi-{% if fraud %}x-circle-fill{% elif warn %}exclamation-triangle-fill{% else %}check-circle-fill{% endif %}"></i>
+      <div>
+        {{ msg }}
+        {% if expl %}
+        <div class="mt-2">
+          {% for e in expl %}<div style="font-size:.8rem;margin-top:3px;">⚠ {{ e }}</div>{% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if error %}
+    <div class="abox danger mb-4"><i class="bi bi-x-circle-fill"></i> {{ error }}</div>
+    {% endif %}
+
+    <form method="POST">{% csrf_token %}
+
+      <!-- Bill Category — icon cards only, no text radio buttons -->
+      <div class="mb-4">
+        <label class="asb-label">Bill Category</label>
+        <div class="row g-2 mt-1">
+
+          <div class="col-3">
+            <input type="radio" name="bill_type" value="Electricity" id="cat_elec" class="d-none" checked>
+            <label for="cat_elec" class="bill-cat-card" onclick="selectCat(this)">
+              <div class="bill-cat-icon" style="background:rgba(255,220,50,.12);color:#FFD700;">⚡</div>
+              <div class="bill-cat-name">Electricity</div>
+            </label>
+          </div>
+
+          <div class="col-3">
+            <input type="radio" name="bill_type" value="Water" id="cat_water" class="d-none">
+            <label for="cat_water" class="bill-cat-card" onclick="selectCat(this)">
+              <div class="bill-cat-icon" style="background:rgba(99,179,237,.12);color:#63B3ED;">💧</div>
+              <div class="bill-cat-name">Water</div>
+            </label>
+          </div>
+
+          <div class="col-3">
+            <input type="radio" name="bill_type" value="Mobile" id="cat_mobile" class="d-none">
+            <label for="cat_mobile" class="bill-cat-card" onclick="selectCat(this)">
+              <div class="bill-cat-icon" style="background:rgba(167,139,250,.12);color:#A78BFA;">📱</div>
+              <div class="bill-cat-name">Mobile</div>
+            </label>
+          </div>
+
+          <div class="col-3">
+            <input type="radio" name="bill_type" value="Internet" id="cat_net" class="d-none">
+            <label for="cat_net" class="bill-cat-card" onclick="selectCat(this)">
+              <div class="bill-cat-icon" style="background:rgba(25,184,160,.12);color:var(--teal);">🌐</div>
+              <div class="bill-cat-name">Internet</div>
+            </label>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Amount -->
+      <div class="mb-4">
+        <label class="asb-label">Amount (₹)</label>
+        <input type="number" name="amount" step="1" min="1" class="asb-input"
+               placeholder="0" style="font-size:1.5rem;font-weight:700;text-align:center;"
+               required>
+      </div>
+
+      <button type="submit" class="btn-gold w-100" style="font-size:1rem;padding:13px;">
+        <i class="bi bi-lightning-charge-fill"></i> Pay Now
+      </button>
+
+    </form>
+  </div>
+</div>
+
+<!-- Balance Card -->
+<div class="col-md-5">
+  <div class="asb-card fu fu1" style="background:linear-gradient(135deg,#172540,#0F1E38);">
+    <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);">Available Balance</div>
+    <div style="font-size:2rem;font-weight:700;color:var(--gold);margin:6px 0;">₹ {{ balance }}</div>
+    <div class="asb-hr"></div>
+    <div style="font-size:.8rem;color:var(--muted);line-height:1.6;">
+      <i class="bi bi-shield-check" style="color:var(--teal);"></i>
+      AI fraud detection runs on every payment.<br>
+      HIGH-risk payments are flagged and not processed.
+    </div>
+    <div class="mt-3">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:.8rem;">
+        <span class="bdg bdg-low">LOW</span> Processed immediately
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:.8rem;">
+        <span class="bdg bdg-med">MEDIUM</span> Processed with warning
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:.8rem;">
+        <span class="bdg bdg-high">HIGH</span> Flagged, not processed
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<style>
+.bill-cat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 8px;
+  background: rgba(255,255,255,.03);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: .2s;
+  text-align: center;
+  width: 100%;
+}
+.bill-cat-card:hover {
+  border-color: rgba(201,168,76,.4);
+  background: rgba(201,168,76,.05);
+}
+.bill-cat-card.selected {
+  border-color: var(--gold);
+  background: rgba(201,168,76,.1);
+}
+.bill-cat-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+}
+.bill-cat-name {
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--text);
+}
+</style>
+
+<script>
+// Mark electricity as selected on load
+document.addEventListener('DOMContentLoaded', function() {
+  var elec = document.querySelector('label[for="cat_elec"]');
+  if (elec) elec.classList.add('selected');
+});
+
+function selectCat(el) {
+  document.querySelectorAll('.bill-cat-card').forEach(function(c) {
+    c.classList.remove('selected');
+  });
+  el.classList.add('selected');
+}
+</script>
+
+{% endblock %}

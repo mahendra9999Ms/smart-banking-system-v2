@@ -1,0 +1,4 @@
+django==5.2
+scikit-learn==1.7.0
+joblib==1.5.0
+numpy==2.2.0

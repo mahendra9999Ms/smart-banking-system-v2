@@ -1,0 +1,51 @@
+{% extends "base.html" %}{% block content %}
+<div class="page-title"><span class="pill">↔</span> All Transactions</div>
+<div class="asb-card fu mb-3">
+  <form method="GET" class="d-flex gap-2 flex-wrap">
+    <select name="status" class="asb-input" style="max-width:200px;">
+      <option value="">All Status</option>
+      {% for val, label in status_choices %}<option value="{{ val }}" {% if status == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <select name="risk" class="asb-input" style="max-width:140px;">
+      <option value="">All Risk</option>
+      <option value="LOW" {% if risk == 'LOW' %}selected{% endif %}>LOW</option>
+      <option value="MEDIUM" {% if risk == 'MEDIUM' %}selected{% endif %}>MEDIUM</option>
+      <option value="HIGH" {% if risk == 'HIGH' %}selected{% endif %}>HIGH</option>
+    </select>
+    <button type="submit" class="btn-gold">Filter</button>
+    <a href="{% url 'all_transactions' %}" class="btn-outline">Clear</a>
+  </form>
+</div>
+<div class="asb-card fu fu1">
+  <table class="asb-table">
+    <thead><tr><th>Date</th><th>User</th><th>Type</th><th>Amount</th><th>Risk</th><th>Status</th><th>Classification</th><th>Classify</th></tr></thead>
+    <tbody>
+    {% for t in transactions %}
+    <tr {% if t.status == 'SUSPICIOUS' or t.status == 'BLOCKED' %}style="background:rgba(224,82,82,.03);"{% elif t.status == 'PENDING_HIGH' %}style="background:rgba(230,126,34,.03);"{% endif %}>
+      <td style="font-size:.78rem;color:var(--muted);">{{ t.created_at|date:"d M, H:i" }}</td>
+      <td style="font-weight:600;">{{ t.user.username }}</td>
+      <td style="font-size:.82rem;">{{ t.bill_type }}</td>
+      <td style="font-weight:700;color:{% if t.status == 'SUSPICIOUS' or t.status == 'BLOCKED' %}var(--red){% else %}var(--gold){% endif %};">₹{{ t.amount }}</td>
+      <td>{% if t.risk_level == 'LOW' %}<span class="bdg bdg-low">LOW</span>{% elif t.risk_level == 'MEDIUM' %}<span class="bdg bdg-med">MED</span>{% else %}<span class="bdg bdg-high">HIGH</span>{% endif %}</td>
+      <td>{% if t.status == 'SUCCESS' %}<span class="bdg bdg-ok">SUCCESS</span>{% elif t.status == 'HIGH_RISK_VERIFIED' %}<span class="bdg bdg-med">VERIFIED</span>{% elif t.status == 'SUSPICIOUS' %}<span class="bdg bdg-warn">SUSPICIOUS</span>{% elif t.status == 'BLOCKED' %}<span class="bdg bdg-danger">BLOCKED</span>{% elif t.status == 'PENDING_HIGH' %}<span class="bdg bdg-pending">PENDING</span>{% else %}<span class="bdg bdg-pending">{{ t.status }}</span>{% endif %}</td>
+      <td><span class="bdg {% if t.classification == 'FRAUD' %}bdg-danger{% elif t.classification == 'SUSPICIOUS' %}bdg-warn{% elif t.classification == 'SAFE' %}bdg-ok{% elif t.classification == 'HIGH_RISK' %}bdg-med{% else %}bdg-pending{% endif %}">{{ t.classification }}</span></td>
+      <td>
+        <form method="POST" action="{% url 'classify_transaction' t.id %}">{% csrf_token %}
+          <div class="d-flex gap-1">
+            <select name="classification" class="asb-input" style="padding:3px 6px;font-size:.75rem;max-width:110px;">
+              <option value="SAFE">SAFE</option>
+              <option value="HIGH_RISK">HIGH RISK</option>
+              <option value="SUSPICIOUS">SUSPICIOUS</option>
+              <option value="FRAUD">FRAUD</option>
+            </select>
+            <button type="submit" class="btn-gold" style="padding:3px 9px;font-size:.75rem;">✓</button>
+          </div>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <div class="pag">{% with transactions as p %}{% if p.has_previous %}<a href="?page={{ p.previous_page_number }}&status={{ status }}&risk={{ risk }}">‹</a>{% endif %}<span class="current">{{ p.number }}/{{ p.paginator.num_pages }}</span>{% if p.has_next %}<a href="?page={{ p.next_page_number }}&status={{ status }}&risk={{ risk }}">›</a>{% endif %}{% endwith %}</div>
+</div>
+{% endblock %}

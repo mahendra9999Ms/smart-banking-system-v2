@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% block content %}
+<div class="row justify-content-center"><div class="col-md-6">
+  <div class="asb-card fu">
+    <div class="page-title"><span class="pill">➕</span> Create Account</div>
+    {% if msg %}{% if msg|slice:":8" == "success:" %}<div class="abox success mb-3"><i class="bi bi-check-circle"></i> {{ msg|slice:"8:" }}</div>{% else %}<div class="abox danger mb-3"><i class="bi bi-x-circle"></i> {{ msg }}</div>{% endif %}{% endif %}
+    <form method="POST">{% csrf_token %}
+      <div class="mb-3"><label class="asb-label">Full Name</label><input type="text" name="full_name" class="asb-input"></div>
+      <div class="mb-3"><label class="asb-label">Username *</label><input type="text" name="username" class="asb-input" required></div>
+      <div class="mb-3"><label class="asb-label">Email</label><input type="email" name="email" class="asb-input"></div>
+      <div class="mb-3"><label class="asb-label">Phone</label><input type="text" name="phone" class="asb-input"></div>
+      <div class="mb-3"><label class="asb-label">Password *</label><input type="password" name="password" class="asb-input" required></div>
+      <div class="mb-4"><label class="asb-label">Initial Balance (₹)</label><input type="number" name="balance" value="5000" class="asb-input" step="100"></div>
+      <button type="submit" class="btn-gold w-100">Create Account →</button>
+    </form>
+  </div>
+</div></div>
+{% endblock %}

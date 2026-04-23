@@ -1,0 +1,29 @@
+{% extends "base.html" %}{% block content %}
+<div class="page-title"><span class="pill">✏</span> Edit User — {{ target_user.username }}</div>
+{% if message %}{% if message|slice:":8" == "success:" %}<div class="abox success fu"><i class="bi bi-check-circle"></i> {{ message|slice:"8:" }}</div>{% else %}<div class="abox danger fu"><i class="bi bi-x-circle"></i> {{ message }}</div>{% endif %}{% endif %}
+<div class="row g-4">
+  <div class="col-md-6"><div class="asb-card fu">
+    <h6 style="font-weight:700;margin-bottom:16px;">Update Details</h6>
+    <form method="POST">{% csrf_token %}<input type="hidden" name="action" value="update">
+      <div class="mb-3"><label class="asb-label">Username</label><input name="username" value="{{ target_user.username }}" class="asb-input"></div>
+      <div class="mb-3"><label class="asb-label">Full Name</label><input name="full_name" value="{{ profile.full_name }}" class="asb-input"></div>
+      <div class="mb-3"><label class="asb-label">Email</label><input name="email" value="{{ profile.email }}" class="asb-input"></div>
+      <div class="mb-4"><label class="asb-label">Phone</label><input name="phone" value="{{ profile.phone }}" class="asb-input"></div>
+      <button type="submit" class="btn-gold">Update</button>
+    </form>
+  </div></div>
+  <div class="col-md-6"><div class="asb-card fu fu1">
+    <h6 style="font-weight:700;margin-bottom:16px;">Reset Password</h6>
+    <form method="POST">{% csrf_token %}<input type="hidden" name="action" value="reset_password">
+      <div class="mb-3"><label class="asb-label">New Password</label><input type="password" name="new_password" class="asb-input" required></div>
+      <div class="mb-4"><label class="asb-label">Confirm Password</label><input type="password" name="confirm_password" class="asb-input" required></div>
+      <button type="submit" class="btn-gold">Reset Password</button>
+    </form>
+    <div class="asb-hr"></div>
+    <div style="font-size:.82rem;color:var(--muted);">
+      Status: <span class="bdg {% if profile.account_status == 'ACTIVE' %}bdg-ok{% else %}bdg-warn{% endif %}">{{ profile.account_status }}</span>
+      &nbsp;Balance: <strong style="color:var(--gold);">₹{{ profile.balance }}</strong>
+    </div>
+  </div></div>
+</div>
+{% endblock %}

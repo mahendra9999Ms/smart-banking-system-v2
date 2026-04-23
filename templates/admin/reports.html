@@ -1,0 +1,56 @@
+{% extends "base.html" %}{% block content %}
+<div class="page-title"><span class="pill">📊</span> Fraud Analytics Report</div>
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3 fu"><div class="asb-card"><div class="si si-teal"><i class="bi bi-arrow-left-right"></i></div><div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;">Total Transactions</div><div style="font-size:1.9rem;font-weight:700;color:var(--teal);">{{ total }}</div></div></div>
+  <div class="col-6 col-md-3 fu fu1"><div class="asb-card"><div class="si si-red"><i class="bi bi-shield-x"></i></div><div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;">Confirmed Fraud</div><div style="font-size:1.9rem;font-weight:700;color:var(--red);">{{ blocked }}</div></div></div>
+  <div class="col-6 col-md-3 fu fu2"><div class="asb-card"><div class="si si-orange"><i class="bi bi-exclamation-triangle"></i></div><div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;">Suspicious</div><div style="font-size:1.9rem;font-weight:700;color:var(--orange);">{{ suspicious }}</div></div></div>
+  <div class="col-6 col-md-3 fu fu3"><div class="asb-card"><div class="si si-gold"><i class="bi bi-percent"></i></div><div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;">Fraud Rate</div><div style="font-size:1.9rem;font-weight:700;color:var(--gold);">{{ fraud_rate }}%</div></div></div>
+</div>
+<div class="row g-4">
+  <div class="col-md-5 fu"><div class="asb-card" style="height:320px;">
+    <div style="font-size:.8rem;color:var(--muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:.08em;">Transaction Breakdown</div>
+    <canvas id="doughnutChart"></canvas>
+  </div></div>
+  <div class="col-md-7 fu fu1"><div class="asb-card" style="height:320px;">
+    <div style="font-size:.8rem;color:var(--muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:.08em;">Risk Level Distribution by Month</div>
+    <canvas id="barChart"></canvas>
+  </div></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const safe = {{ total }} - {{ blocked }} - {{ suspicious }} - {{ high_risk }};
+new Chart(document.getElementById('doughnutChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Safe','High Risk','Suspicious','Confirmed Fraud'],
+    datasets: [{ data: [safe, {{ high_risk }}, {{ suspicious }}, {{ blocked }}],
+      backgroundColor: ['#19B8A0','#E67E22','#C9A84C','#E05252'], borderWidth: 0 }]
+  },
+  options: { plugins: { legend: { labels: { color: '#7A8BAA', font: { size: 12 } } } }, cutout: '65%' }
+});
+
+const monthlyData = {{ monthly|safe }};
+const months = [...new Set(monthlyData.map(d => d.month))].sort();
+const lowData    = months.map(m => { const f = monthlyData.find(d => d.month === m && d.risk_level === 'LOW');    return f ? f.c : 0; });
+const medData    = months.map(m => { const f = monthlyData.find(d => d.month === m && d.risk_level === 'MEDIUM'); return f ? f.c : 0; });
+const highData   = months.map(m => { const f = monthlyData.find(d => d.month === m && d.risk_level === 'HIGH');   return f ? f.c : 0; });
+
+new Chart(document.getElementById('barChart'), {
+  type: 'bar',
+  data: {
+    labels: months.map(m => { const names = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return names[parseInt(m)] || m; }),
+    datasets: [
+      { label: 'LOW',    data: lowData,  backgroundColor: 'rgba(25,184,160,.6)' },
+      { label: 'MEDIUM', data: medData,  backgroundColor: 'rgba(230,126,34,.6)' },
+      { label: 'HIGH',   data: highData, backgroundColor: 'rgba(224,82,82,.6)' },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    scales: { x: { ticks: { color: '#7A8BAA' }, grid: { color: 'rgba(255,255,255,.04)' } },
+              y: { ticks: { color: '#7A8BAA' }, grid: { color: 'rgba(255,255,255,.06)' } } },
+    plugins: { legend: { labels: { color: '#7A8BAA' } } }
+  }
+});
+</script>
+{% endblock %}
