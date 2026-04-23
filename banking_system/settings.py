@@ -5,7 +5,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'fallback-secret')
 DEBUG = False
 ALLOWED_HOSTS = ['*']
 CSRF_TRUSTED_ORIGINS = [
-    "https://smart-banking-system-v2-production.up.railway.app"
+    "https://*.up.railway.app"
 ]
 
 INSTALLED_APPS = [
@@ -39,7 +39,7 @@ LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Asia/Kolkata'
 USE_I18N = True
 USE_TZ = True
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
